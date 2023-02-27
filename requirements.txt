@@ -1,2 +1,4 @@
 # Install OpenCV for data reading and use
-cv2
+opencv-python
+# Matplotlib for visualising data
+matplotlib~=3.3.4
