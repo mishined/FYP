@@ -1,0 +1,2 @@
+# Install OpenCV for data reading and use
+cv2
