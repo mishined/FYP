@@ -1,8 +1,15 @@
 # Install OpenCV for data reading and use
 opencv-python
 # Matplotlib for visualising data
-matplotlib~=3.3.4
+# matplotlib~=3.3.4
 # Warping - backward and forward
 flowpy
 # fix problems with running some code
 av
+# used for RAFT
+torch
+torchvision
+# for notebooks
+ipykernel
+numpy
+scipy
