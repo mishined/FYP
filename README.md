@@ -31,4 +31,4 @@ Diary
 - managed to make RAFT work - no
 - remap successful 
   - using warping - different results - what do they mean?
-- evaluation / loss techniques
+- evaluation / loss techniques 
