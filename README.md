@@ -32,3 +32,8 @@ Diary
 - remap successful 
   - using warping - different results - what do they mean?
 - evaluation / loss techniques 
+
+- optimise hyperparameter 
+
+- explaining what is going on 
+writing 
