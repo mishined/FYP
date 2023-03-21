@@ -13,5 +13,5 @@ torchvision
 ipykernel
 numpy
 scipy
-# evalution for images - skimage metricss
+# evaluation for images - skimage metricss
 scikit-image 
