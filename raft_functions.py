@@ -94,7 +94,7 @@ def load_batches():
     pass
 
 
-def preprocess(img1_batch, img2_batch, transforms):
+def preprocess(img1_batch, img2_batch, transforms = 'transforms'):
     # img1_batch = F.resize(img1_batch, size=[520, 960], antialias=False)
     # img2_batch = F.resize(img2_batch, size=[520, 960], antialias=False)
     img1_batch = F.resize(img1_batch, size=[352, 352], antialias=False) # resize frames to ensure they are divisable by 8 
@@ -131,11 +131,12 @@ def evaluate_raft(img1_batch, img2_batch, predicted_flows, remapping = 'forward'
     images2 = convert_images(img2_batch) # all frames 2
 
     flows = convert_flow(predicted_flows)
-
+    similarity = []
     if remapping == 'forward':
-        mapped = remap_forward(images1, flows)
-        return [sm.structural_similarity(images2[:, :, 0], mapped[:,:,0])]
-
+        mapped = remap_forward(images1[0], flows[0])
+        similarity.append(sm.structural_similarity(images2[0 , :, :, 0], mapped[:,:,0]))
+        
     else:
         mapped = remap_backward(images2, flows)
         return [sm.structural_similarity(images1[:,:,0], mapped[:,:,0])]
+        
