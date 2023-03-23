@@ -15,7 +15,7 @@ def convert_images(img_batch):
     return img2
 
 def convert_flow(predicted_flows):
-    flows_tchw = [predicted_flows[a].detach().numpy()[:,:] for a in range(predicted_flows.shape[0])] # make it back to numpy arrays for all N predicted flows
+    flows_tchw = [predicted_flows[a].detach().numpy()[:,:,:] for a in range(predicted_flows.shape[0])] # make it back to numpy arrays for all N predicted flows
     flows = np.moveaxis(flows_tchw, 0, -1) # change the dimmensions from TCHW to THWC
     return flows
 
@@ -118,7 +118,7 @@ def raft(img1_batch, img2_batch, raft_ = 'large', device = 'cpu'):
     # get list of predictions
     list_of_flows = model(img1_batch.to(device), img2_batch.to(device))
     # get the last one - most accurate
-    predicted_flow = list_of_flows[-1][0]
+    predicted_flow = list_of_flows[-1]
 
     return predicted_flow
 
