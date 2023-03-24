@@ -11,7 +11,7 @@ def convert_images(img_batch):
     # print(img_batch.shape)
     img2_batch = [(img2 + 1) / 2 for img2 in img_batch] # upsampling the image back to original
     # print(len(img2_batch))
-    img2 = np.array([np.moveaxis(img2_batch[a].numpy()[:,:,:], 0, -1) for a in range(len(img2_batch))])
+    img2 = np.array([np.moveaxis(img2_batch[a].numpy()[:,:,:], 0, -1) for a in range(len(img_batch))])
     return img2
 
 def convert_flow(predicted_flows):
@@ -49,8 +49,8 @@ def remap_backward(image, flow):
     x = np.linspace(0, image.shape[0], image.shape[0])
     y = np.linspace(0, image.shape[1], image.shape[1])
     xv, yv = np.meshgrid(x,y)
-    map_x = flow[:, :, 0] + yv
-    map_y = flow[:, :, 1] + xv
+    map_x = flow[:, :, 0] + xv
+    map_y = flow[:, :, 1] + yv
 
     mapped_img = cv2.remap(image, map_x.astype(np.float32), map_y.astype(np.float32), cv2.INTER_LINEAR) #pull back mapping to avoid holes in the image
     return mapped_img
@@ -90,29 +90,49 @@ def draw_remap_with_flow(image_from, image_to, flow):
 
 from torchvision.io import read_video
 
-def load_batches():
-    pass
+def load_image_batches(path, step = 10):
+    # path = "C:/Users/Misha/OneDrive - University of Sussex/FYP/Participants/Participant_12/Processed_data/Video/Subject_12_01.mp4"
 
+    frames, _, _ = read_video(str(path), output_format="TCHW") # returns video frames, audio frames, metadata for the video and audio
 
-def preprocess(img1_batch, img2_batch, transforms = 'transforms'):
-    # img1_batch = F.resize(img1_batch, size=[520, 960], antialias=False)
-    # img2_batch = F.resize(img2_batch, size=[520, 960], antialias=False)
-    img1_batch = F.resize(img1_batch, size=[352, 352], antialias=False) # resize frames to ensure they are divisable by 8 
-    img2_batch = F.resize(img2_batch, size=[352, 352], antialias=False)
-    return transforms(img1_batch, img2_batch)
+    images1 = []
+    images2 = []
+    for i in range(0, len(frames)-2, step):
+        images1.append(frames[i, :, 200:500, 600:900])
+        images2.append(frames[i+1, :, 200:500, 600:900])
+    img1_batch = torch.stack(images1) # making predictions between 2 pairs of frames 53 and 83, and 84 and 130
+    img2_batch = torch.stack(images2)
+
+    return img1_batch, img2_batch
 
 
 from torchvision.models.optical_flow import Raft_Large_Weights
+from torchvision.models.optical_flow import Raft_Small_Weights
 from torchvision.models.optical_flow import raft_large
 
-def raft(img1_batch, img2_batch, raft_ = 'large', device = 'cpu'):
-    # set the weights
-    weights = Raft_Large_Weights.DEFAULT
+
+def preprocess(img1_batch, img2_batch, transf = 'large', s = 352):
+    if transf == 'large':
+        weights = Raft_Large_Weights.DEFAULT
+    else: 
+        weights = Raft_Small_Weights.DEFAULT
     transforms = weights.transforms()
+    # img1_batch = F.resize(img1_batch, size=[520, 960], antialias=False)
+    # img2_batch = F.resize(img2_batch, size=[520, 960], antialias=False)
+    img1_batch = F.resize(img1_batch, size=[s, s], antialias=False) # resize frames to ensure they are divisable by 8 
+    img2_batch = F.resize(img2_batch, size=[s, s], antialias=False)
+    return transforms(img1_batch, img2_batch)
+
+def raft(img1_batch, img2_batch, raft_ = 'large', device = 'cpu', s = 352):
+    # set the weights
+    if raft_ == 'large':
+        weights = Raft_Large_Weights.DEFAULT
+    else: 
+        weights = Raft_Small_Weights.DEFAULT
     # prepare the images for the model
-    img1_batch, img2_batch = preprocess(img1_batch, img2_batch, transforms)
+    img1_batch, img2_batch = preprocess(img1_batch, img2_batch, transf = raft_, s = s)
     # create model
-    model = raft_large(weights=Raft_Large_Weights.DEFAULT, progress=False).to(device)
+    model = raft_large(weights, progress=False).to(device)
     model = model.eval()
 
     # get list of predictions
@@ -123,15 +143,14 @@ def raft(img1_batch, img2_batch, raft_ = 'large', device = 'cpu'):
     return predicted_flow
 
 
-    # flow_img = flow_to_image(predicted_flow).to("cpu")
-
-
 def evaluate_raft(img1_batch, img2_batch, predicted_flows, remapping = 'forward'):
     images1 = convert_images(img1_batch) # all frames 1
     images2 = convert_images(img2_batch) # all frames 2
 
     flows = convert_flow(predicted_flows)
     similarity = []
+    print(images1.shape)
+    print(flows.shape)
     if remapping == 'forward':
         mapped = remap_forward(images1[0], flows[0])
         similarity.append(sm.structural_similarity(images2[0 , :, :, 0], mapped[:,:,0]))
@@ -139,4 +158,36 @@ def evaluate_raft(img1_batch, img2_batch, predicted_flows, remapping = 'forward'
     else:
         mapped = remap_backward(images2, flows)
         return [sm.structural_similarity(images1[:,:,0], mapped[:,:,0])]
+
+
+
+
+
+
+
+
+
+def evaluate_raft_(img1_batch, img2_batch, predicted_flows, remapping = 'forward'):
+    images1 = convert_images(img1_batch) # all frames 1
+    images2 = convert_images(img2_batch) # all frames 2
+
+    flows = convert_flow(predicted_flows)
+    similarity = []
+    mapped = []
+    if remapping == 'forward':
+        for i in range(len(flows)):
+            mapped.append(remap_forward(images1[i], flows[i]))
+            print(mapped[i].shape)
+            print(images2[i].shape)
+            similarity.append([sm.structural_similarity(images2[i][: , :, 0], mapped[i][:, :, 0]  )])
+        
+    else:
+        for i in range(len(flows)):
+            mapped.append(remap_backward(images2[i], flows[i]))
+            print(mapped[i].shape)
+            print(images2[i].shape)
+            similarity.append([sm.structural_similarity(images1[i][: , :, 0], mapped[i][:, :, 0]  )])
+    
+
+    return similarity
         
