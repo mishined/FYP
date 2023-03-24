@@ -16,7 +16,7 @@ def convert_images(img_batch):
 
 def convert_flow(predicted_flows):
     flows_tchw = [predicted_flows[a].detach().numpy()[:,:,:] for a in range(predicted_flows.shape[0])] # make it back to numpy arrays for all N predicted flows
-    flows = np.moveaxis(flows_tchw, 0, -1) # change the dimmensions from TCHW to THWC
+    flows = np.moveaxis(flows_tchw, 1, -1) # change the dimmensions from TCHW to THWC
     return flows
 
 
