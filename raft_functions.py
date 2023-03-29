@@ -123,16 +123,17 @@ def preprocess(img1_batch, img2_batch, transf = 'large', s = 352):
     img2_batch = F.resize(img2_batch, size=[s, s], antialias=False)
     return transforms(img1_batch, img2_batch)
 
-def raft(img1_batch, img2_batch, raft_ = 'large', device = 'cpu', s = 352):
+def raft(img1_batch, img2_batch, raft_ = 'large', device = 'cpu', s = 352, preprocess = False):
     # set the weights
     if raft_ == 'large':
         weights = Raft_Large_Weights.DEFAULT
     else: 
         weights = Raft_Small_Weights.DEFAULT
     # prepare the images for the model
-    img1_batch, img2_batch = preprocess(img1_batch, img2_batch, transf = raft_, s = s)
+    if preprocess:
+        img1_batch, img2_batch = preprocess(img1_batch, img2_batch, transf = raft_, s = s)
     # create model
-    model = raft_large(weights, progress=False).to(device)
+    model = raft_large(weights, progress=True).to(device)
     model = model.eval()
 
     # get list of predictions
