@@ -64,7 +64,7 @@ def draw_process_evaluate(image_from, image_to, mapped):
     plt.subplot(1,3,3)
     plt.imshow(mapped, cmap = "gray")
     plt.show()
-    print('Structural similarity between the 2 images:', sm.structural_similarity(image_to[:, :, 0], mapped[:,:,0]))
+    print('Structural similarity between the 2 images:', sm.structural_similarity(image_to[:, :, 0], mapped[:,:,0], data_range=1))
 
 
 def draw_remap_with_flow(image_from, image_to, flow):
