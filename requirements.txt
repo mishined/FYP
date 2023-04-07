@@ -15,3 +15,10 @@ numpy
 scipy
 # evaluation for images - skimage metricss
 scikit-image 
+
+# extracting seperate phonemes from videos using the text labels in the video
+pytesseract
+tesseract
+
+# extracting seperate phonemes from videos using the text labels in the video
+librosa
