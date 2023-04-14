@@ -22,3 +22,6 @@ tesseract
 
 # extracting seperate phonemes from videos using the text labels in the video
 librosa
+
+# audio segmentation
+pydub
