@@ -35,8 +35,8 @@ def draw_flow(img, flow, step=16):
 
 def remap_forward(image, flow):
     flow[np.isnan(flow)] = 0
-    x = np.linspace(0, image.shape[0], image.shape[1])
-    y = np.linspace(0, image.shape[1], image.shape[1])
+    x = np.linspace(0, image.shape[1], image.shape[1])
+    y = np.linspace(0, image.shape[0], image.shape[0])
     xv, yv = np.meshgrid(x,y)
     map_x = -flow[:, :, 0] + xv
     map_y = -flow[:, :, 1] + yv
@@ -46,8 +46,8 @@ def remap_forward(image, flow):
 
 def remap_backward(image, flow):
     flow[np.isnan(flow)] = 0
-    x = np.linspace(0, image.shape[0], image.shape[0])
-    y = np.linspace(0, image.shape[1], image.shape[1])
+    x = np.linspace(0, image.shape[1], image.shape[1])
+    y = np.linspace(0, image.shape[0], image.shape[0])
     xv, yv = np.meshgrid(x,y)
     map_x = flow[:, :, 0] + xv
     map_y = flow[:, :, 1] + yv
