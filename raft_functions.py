@@ -191,4 +191,26 @@ def evaluate_raft_(img1_batch, img2_batch, predicted_flows, remapping = 'forward
     
 
     return similarity
+
+
+def evaluate_raft_2(images1, images2, flows, remapping = 'forward'):
+
+    similarity = []
+    mapped = []
+    if remapping == 'forward':
+        for i in range(len(flows)):
+            mapped.append(remap_forward(images1[i], flows[i][:,:,:]))
+            # draw_process_evaluate(images1[i], images2[i], remap_forward(images1[i], flows[i][:,:,:]))
+            # plt.imshow(draw_flow(images1[i][:,:,0], -flows[i][:,:,:], step=10)), plt.show()
+            similarity.append([sm.structural_similarity(images2[i][: , :, 0], mapped[i][:, :, 0], data_range= 1)])
+        
+    else:
+        for i in range(len(flows)):
+            mapped.append(remap_backward(images2[i], flows[i][:,:,:]))
+            draw_process_evaluate(images2[i], images1[i], remap_backward(images2[i], -flows[i][:,:,:]))
+            plt.imshow(draw_flow(images2[i][:,:,0], -flows[i][:,:,:], step=20)), plt.show()
+            similarity.append([sm.structural_similarity(images1[i][: , :, 0], mapped[i][:, :, 0], data_range=1)])
+    
+
+    return np.mean(similarity)
         
