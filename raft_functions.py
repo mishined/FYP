@@ -214,3 +214,111 @@ def evaluate_raft_2(images1, images2, flows, remapping = 'forward'):
 
     return np.mean(similarity)
         
+
+
+
+
+
+
+
+from torchvision.io import read_video
+from torch import from_numpy
+import skimage
+def load_image_batches(path, step = 10, smooth = 5):
+    # path = "C:/Users/Misha/OneDrive - University of Sussex/FYP/Participants/Participant_12/Processed_data/Video/Subject_12_03.mp4"
+
+    frames, _, _ = read_video(str(path), output_format="TCHW") # returns video frames, audio frames, metadata for the video and audio
+    # print(frames.shape)
+    images1 = []
+    images2 = []
+    img = np.array([np.moveaxis(frames[a].numpy()[:,:,:], 0, -1) for a in range(len(frames))])
+    # print(img.shape)
+    # print(sm.structural_similarity(img[0, 200:500, 600:900, 0], img[1, 200:500, 600:900, 0]))
+    # len(frames)-2
+    for i in range(0, len(frames)-2, step):
+        img1 = img[i, 100:600, 500:1000, :]
+        img2 = img[i+1, 100:600, 500:1000, :]
+        if (sm.structural_similarity(img1[:,:,0], img2[:,:,0]) < 0.90):
+            # print(sm.structural_similarity(img[i, 200:500, 600:900, 0], img[i+1, 200:500, 600:900, 0]))
+            # plt.imshow(img1, cmap = 'gray'), plt.show()
+            # plt.imshow(img[i+1, 200:500, 600:900, 0], cmap = 'gray'), plt.show()
+            # blur = cv2.bilateralFilter(img1, smooth, 160, 160)
+            # blurred = np.moveaxis(blur, -1, 0)
+            # blurred2 = np.moveaxis(cv2.bilateralFilter(img2,smooth,160,160), -1, 0)
+            # print(img1.dtype)
+            new_shape = (img1.shape[0] , img1.shape[1] , img1.shape[2])
+            blurred1 = skimage.transform.resize(image=img1, output_shape=new_shape).astype(np.float32)
+            blurred2 = skimage.transform.resize(image=img2, output_shape=new_shape).astype(np.float32)
+            # print(blurred1.shape)
+
+            blurred_1 = np.moveaxis(cv2.bilateralFilter(blurred1,smooth,160,160), -1, 0)
+            blurred_2 = np.moveaxis(cv2.bilateralFilter(blurred2,smooth,160,160), -1, 0)
+
+            # print(blurred.shape)
+            # plt.imshow(blurred, cmap= 'gray'), plt.show()
+            images1.append(torch.from_numpy(blurred_1))
+            images2.append(torch.from_numpy(blurred_2))
+            # images1.append(frames[i, :, 200:500, 600:900])
+            # images2.append(frames[i+1, :, 200:500, 600:900])
+
+    if len(images2) < 1: #when the video is too short/ redundant video
+        img1_batch = images1
+        img2_batch = images2
+    else:
+        img1_batch = torch.stack(images1) # making predictions between 2 pairs of frames 53 and 83, and 84 and 130
+        img2_batch = torch.stack(images2)
+
+    return img1_batch, img2_batch
+
+
+from torchvision.io import read_video
+from torch import from_numpy
+import skimage
+from skimage import metrics as sm
+import numpy as np
+import cv2
+
+def load_image_batches_all(paths, step = 10, smooth = 5):
+    # path = "C:/Users/Misha/OneDrive - University of Sussex/FYP/Participants/Participant_12/Processed_data/Video/Subject_12_03.mp4"
+    img1_batch_all = []
+    img2_batch_all = []
+
+    for num, path in enumerate(paths):
+        img1_batch, img2_batch = load_image_batches(path, step, smooth)
+        if len(img1_batch) < 1: continue
+        img1_batch_all.append(img1_batch)
+        img2_batch_all.append(img2_batch)
+
+    return img1_batch_all, img2_batch_all
+
+
+
+
+import glob
+
+# function to extract the paths for files froma path
+def load_paths(data_path):
+    files = []
+    files.append(glob.glob(data_path, 
+                recursive = True))
+    return files[0]
+
+
+def flows_all(img1_batch, img2_batch, s = 336):
+    
+    img1__batch_all = []
+    img2__batch_all = []
+    flows = []
+
+    for i in range(len(img1_batch)):
+        img1__batch, img2__batch = preprocess(img1_batch[i], img2_batch[i], s = 336)
+        img1__batch_all.append(img1__batch)
+        img2__batch_all.append(img2__batch)
+        predicted_flow = raft(img1__batch, img2__batch)
+        flows.append(predicted_flow)
+
+    return img1__batch_all, img2__batch_all, flows
+
+
+
+print(1)
