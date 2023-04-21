@@ -144,78 +144,98 @@ def raft(img1_batch, img2_batch, raft_ = 'large', device = 'cpu', s = 352, prepr
     return predicted_flow
 
 
-def evaluate_raft(img1_batch, img2_batch, predicted_flows, remapping = 'forward'):
-    images1 = convert_images(img1_batch) # all frames 1
-    images2 = convert_images(img2_batch) # all frames 2
+# def evaluate_raft(img1_batch, img2_batch, predicted_flows, remapping = 'forward'):
+#     images1 = convert_images(img1_batch) # all frames 1
+#     images2 = convert_images(img2_batch) # all frames 2
 
-    flows = convert_flow(predicted_flows)
-    similarity = []
-    print(images1.shape)
-    print(flows.shape)
-    if remapping == 'forward':
-        mapped = remap_forward(images1[0], flows[0])
-        similarity.append(sm.structural_similarity(images2[0 , :, :, 0], mapped[:,:,0]))
+#     flows = convert_flow(predicted_flows)
+#     similarity = []
+#     print(images1.shape)
+#     print(flows.shape)
+#     if remapping == 'forward':
+#         mapped = remap_forward(images1[0], flows[0])
+#         similarity.append(sm.structural_similarity(images2[0 , :, :, 0], mapped[:,:,0]))
         
-    else:
-        mapped = remap_backward(images2, flows)
-        return [sm.structural_similarity(images1[:,:,0], mapped[:,:,0])]
+#     else:
+#         mapped = remap_backward(images2, flows)
+#         return [sm.structural_similarity(images1[:,:,0], mapped[:,:,0])]
 
+# def evaluate_raft_(img1_batch, img2_batch, predicted_flows, remapping = 'forward'):
+#     images1 = convert_images(img1_batch) # all frames 1
+#     images2 = convert_images(img2_batch) # all frames 2
 
-
-
-
-
-
-
-
-def evaluate_raft_(img1_batch, img2_batch, predicted_flows, remapping = 'forward'):
-    images1 = convert_images(img1_batch) # all frames 1
-    images2 = convert_images(img2_batch) # all frames 2
-
-    flows = convert_flow(predicted_flows)
-    similarity = []
-    mapped = []
-    if remapping == 'forward':
-        for i in range(len(flows)):
-            mapped.append(remap_forward(images1[i], flows[i]))
-            print(mapped[i].shape)
-            print(images2[i].shape)
-            similarity.append([sm.structural_similarity(images2[i][: , :, 0], mapped[i][:, :, 0]  )])
+#     flows = convert_flow(predicted_flows)
+#     similarity = []
+#     mapped = []
+#     if remapping == 'forward':
+#         for i in range(len(flows)):
+#             mapped.append(remap_forward(images1[i], flows[i]))
+#             print(mapped[i].shape)
+#             print(images2[i].shape)
+#             similarity.append([sm.structural_similarity(images2[i][: , :, 0], mapped[i][:, :, 0]  )])
         
-    else:
-        for i in range(len(flows)):
-            mapped.append(remap_backward(images2[i], flows[i]))
-            print(mapped[i].shape)
-            print(images2[i].shape)
-            similarity.append([sm.structural_similarity(images1[i][: , :, 0], mapped[i][:, :, 0]  )])
+#     else:
+#         for i in range(len(flows)):
+#             mapped.append(remap_backward(images2[i], flows[i]))
+#             print(mapped[i].shape)
+#             print(images2[i].shape)
+#             similarity.append([sm.structural_similarity(images1[i][: , :, 0], mapped[i][:, :, 0]  )])
+
+#     return similarity
+
+
+# def evaluate_raft_2(images1, images2, flows, remapping = 'forward'):
+
+#     similarity = []
+#     mapped = []
+#     if remapping == 'forward':
+#         for i in range(len(flows)):
+#             mapped.append(remap_forward(images1[i], flows[i][:,:,:]))
+#             # draw_process_evaluate(images1[i], images2[i], remap_forward(images1[i], flows[i][:,:,:]))
+#             # plt.imshow(draw_flow(images1[i][:,:,0], -flows[i][:,:,:], step=10)), plt.show()
+#             similarity.append([sm.structural_similarity(images2[i][: , :, 0], mapped[i][:, :, 0], data_range= 1)])
+        
+#     else:
+#         for i in range(len(flows)):
+#             mapped.append(remap_backward(images2[i], flows[i][:,:,:]))
+#             draw_process_evaluate(images2[i], images1[i], remap_backward(images2[i], -flows[i][:,:,:]))
+#             plt.imshow(draw_flow(images2[i][:,:,0], -flows[i][:,:,:], step=20)), plt.show()
+#             similarity.append([sm.structural_similarity(images1[i][: , :, 0], mapped[i][:, :, 0], data_range=1)])
     
+#     return np.mean(similarity)
 
-    return similarity
+import flowpy        
 
+def evaluate_raft_2(img1_batch, img2_batch, predicted_flows, remapping = 'forward'):
+    print(img1_batch.shape)
 
-def evaluate_raft_2(images1, images2, flows, remapping = 'forward'):
+    images1 = convert_images(img1_batch) # all frames 1
+    images2 = convert_images(img2_batch) # all frames 2
+    print(images1.shape)
+    flows = convert_flow(predicted_flows)
 
     similarity = []
     mapped = []
     if remapping == 'forward':
         for i in range(len(flows)):
-            mapped.append(remap_forward(images1[i], flows[i][:,:,:]))
-            # draw_process_evaluate(images1[i], images2[i], remap_forward(images1[i], flows[i][:,:,:]))
-            # plt.imshow(draw_flow(images1[i][:,:,0], -flows[i][:,:,:], step=10)), plt.show()
+            flows[np.isnan(flows)] = 0
+            mapped.append(flowpy.forward_warp(images1[i], flows[i]))
+            draw_process_evaluate(images1[i], images2[i],flowpy.forward_warp(images1[i], flows[i]))
+            plt.imshow(draw_flow(images1[i][:,:,0], -flows[i][:,:,:], step=13)), plt.show()
             similarity.append([sm.structural_similarity(images2[i][: , :, 0], mapped[i][:, :, 0], data_range= 1)])
+            print()
         
     else:
         for i in range(len(flows)):
-            mapped.append(remap_backward(images2[i], flows[i][:,:,:]))
-            draw_process_evaluate(images2[i], images1[i], remap_backward(images2[i], -flows[i][:,:,:]))
-            plt.imshow(draw_flow(images2[i][:,:,0], -flows[i][:,:,:], step=20)), plt.show()
+            # mapped.append(remap_backward(images2[i], flows[i][:,:,:]))
+            # draw_process_evaluate(images2[i], images1[i], remap_backward(images2[i], flows[i][:,:,:]))
+            mapped.append(flowpy.backward_warp(images2[i], flows[i]))
+            draw_process_evaluate(images2[i], images1[i], flowpy.backward_warp(images2[i], flows[i]))
+            plt.imshow(draw_flow(images2[i][:,:,0], flows[i][:,:,:], step=12)), plt.show()
             similarity.append([sm.structural_similarity(images1[i][: , :, 0], mapped[i][:, :, 0], data_range=1)])
     
-
+    print(np.mean(similarity))
     return np.mean(similarity)
-        
-
-
 
 
 
