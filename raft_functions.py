@@ -123,7 +123,9 @@ def preprocess(img1_batch, img2_batch, transf = 'large', s = 352):
     img2_batch = F.resize(img2_batch, size=[s, s], antialias=False)
     return transforms(img1_batch, img2_batch)
 
-def raft(img1_batch, img2_batch, raft_ = 'large', device = 'cpu', s = 352, preprocess = False):
+def raft(img1_batch, img2_batch, raft_ = 'large', s = 352, preprocess = False):
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cpu'
     # set the weights
     if raft_ == 'large':
         weights = Raft_Large_Weights.DEFAULT

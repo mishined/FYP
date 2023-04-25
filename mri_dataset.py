@@ -1,5 +1,6 @@
 from __future__ import print_function, division
 import os
+import sklearn
 import torch
 # import pandas as pd
 from skimage import io, transform
@@ -14,9 +15,9 @@ import skimage
 import cv2
 from skimage import metrics as sm
 import torchvision.transforms.functional as F
-
-from torchvision.models.optical_flow import Raft_Large_Weights
 from torchvision.models.optical_flow import raft_large
+from torchvision.models.optical_flow import Raft_Large_Weights
+# from torchvision.models.optical_flow import raft_large
 
 # Ignore warnings
 import warnings
