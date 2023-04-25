@@ -22,6 +22,9 @@ from torchvision.models.optical_flow import raft_large
 import warnings
 warnings.filterwarnings("ignore")
 
+def get_dataloader(dataset, batch_size):
+    dataloader = DataLoader(dataset= dataset, batch_size = batch_size, shuffle= False)
+    return dataloader
 
 class MRIDataset(Dataset):
     """MRI dataset."""
@@ -53,6 +56,16 @@ class MRIDataset(Dataset):
                 sample = self.transform(sample)
 
         return sample
+    
+    def make_dataset(self, root_dir):
+        paths = self.load_paths(root_dir)
+        samples = []
+        for idx in len(paths):
+            vid_name = self.paths[idx]
+            sample = self.load_image_batches(vid_name, 1, 24)
+            samples.append(samples)
+        
+        return samples
     
 
 
