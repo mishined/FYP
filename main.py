@@ -39,15 +39,15 @@ if __name__ == '__main__':
         # print((videos[0].shape))
         sample1, sample2 = videos
         if isinstance(sample1, list): continue
-        print(sample1.shape)
+        print(i)
         # print(type(sample1))
         # if isinstance(sample1[0], list): continue
         flow = raft(sample1[0], sample2[0])
         flows.append(flow)
-        if i > 100: break
+        
 
     print(len(flows))
     
-    with open('flows1.pickle','wb') as temp:
+    with open('flows2.pickle','wb') as temp:
         pickle.dump(flows, temp)
 
