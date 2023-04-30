@@ -6,10 +6,10 @@ import pickle
 
 if __name__ == '__main__':
 
-    video_dataset = MRIDataset("/Users/men22/OneDrive - University of Sussex/FYP/Participants/VIDEOS_ALL/*.mp4", 
+    video_dataset = MRIDataset("/Users/Misha/OneDrive - University of Sussex/FYP/Participants/VIDEOS_ALL/*.mp4", 
                                transform=None)
 
-    video_dataset_transformed = MRIDataset("/Users/men22/OneDrive - University of Sussex/FYP/Participants/VIDEOS_ALL/*.mp4", 
+    video_dataset_transformed = MRIDataset("/Users/Misha/OneDrive - University of Sussex/FYP/Participants/VIDEOS_ALL/*.mp4", 
                                transform=transforms.Compose([Rescale(256),
                                RaftTransforms()]))
     
@@ -44,7 +44,18 @@ if __name__ == '__main__':
         # if isinstance(sample1[0], list): continue
         flow = raft(sample1[0], sample2[0])
         flows.append(flow)
+
+    # for i, videos in enumerate(video_dataloader):
         
+    #     # print((videos[0].shape))
+    #     sample1, sample2 = videos
+    #     if isinstance(sample1, list): continue
+    #     print(i)
+    #     # print(type(sample1))
+    #     # if isinstance(sample1[0], list): continue
+    #     flow = raft(sample1[0], sample2[0])
+    #     flows.append(flow)
+     
 
     print(len(flows))
     
