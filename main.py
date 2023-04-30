@@ -35,7 +35,7 @@ if __name__ == '__main__':
     
     flows = []
     for i, videos in enumerate(video_dataloader):
-        
+        if i == 30: break
         # print((videos[0].shape))
         sample1, sample2 = videos
         if isinstance(sample1, list): continue
@@ -44,6 +44,7 @@ if __name__ == '__main__':
         # if isinstance(sample1[0], list): continue
         flow = raft(sample1[0], sample2[0])
         flows.append(flow)
+
 
     # for i, videos in enumerate(video_dataloader):
         
@@ -59,6 +60,10 @@ if __name__ == '__main__':
 
     print(len(flows))
     
+    # with open('flows2.pickle','wb') as temp:
+    #     pickle.dump(flows, temp)
+
+    import pickle
     with open('flows2.pickle','wb') as temp:
-        pickle.dump(flows, temp)
+        pickle.dump([video_dataset, video_dataset_transformed, flows], temp)
 
