@@ -27,3 +27,4 @@ librosa
 
 # audio segmentation
 # pydub
+seaborn
