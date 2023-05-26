@@ -3,15 +3,15 @@ Final Year Project - Analysing speech motion from MRI Data
 
 Meeting 0:
 - confirmed a project idea and chose a project to continue with
-- discussed two perspective the project can go to 
+- discussed two perspectives the project can go to 
   - super-resolution to improve MRI video quality
   - analysing the motion in the MRI video to find how different people pronounce phonems
 
 
 
 Diary
-- tried different optical flow techniques - RAFT didnt work
-- using Dense Oprical Flow - find the flow of 1 image - improve hyperparameters - which ones and why and what they mean
+- tried different optical flow techniques - RAFT didnt work at first
+- using Dense Optical Flow - find the flow of 1 image - improve hyperparameters - which ones and why and what they mean
 - change the hyperparameters to current best - 
 
      cv2.calcOpticalFlowFarneback(prev_gray,
@@ -26,9 +26,9 @@ Diary
                                     flags = 0)
 
 - Looked at the optical flow and saw some differences
-- managed to draw the arrows
+- managed to draw the flow vectors
 - tried remapping the optical flow to the old image to see if it the task is successful or not
-- managed to make RAFT work - no
+- managed to make RAFT work
 - remap successful 
   - using warping - different results - what do they mean?
 - evaluation / loss techniques 
